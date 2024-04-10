@@ -1,10 +1,16 @@
+import { useEffect } from "react";
 import type { RootState } from "./app/store";
 import { useSelector, useDispatch } from "react-redux";
-import { selectMonster, resetSelectedMonster } from "./reducers/cardSlice";
+import {
+  selectMonster,
+  resetSelectedMonster,
+  setAllMonsters,
+} from "./reducers/cardSlice";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
 
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
+import { CardMedia, Grid, Typography } from "@mui/material";
 
 function App() {
   const dispatch = useDispatch();
@@ -12,44 +18,98 @@ function App() {
     (state: RootState) => state.monster.selectedMonsterId
   );
 
+  useEffect(() => {
+    const fetchMonsters = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/monsters");
+        const data = await response.json();
+        dispatch(setAllMonsters(data));
+      } catch (error) {
+        console.error("Error fetching monsters:", error);
+      }
+    };
+
+    fetchMonsters();
+  }, [dispatch]);
+
+  const monsters = useSelector((state: RootState) => state.monster.allMonsters);
+
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
+      <h1>Card Battle</h1>
+
+      <Grid container spacing={2}>
+        {monsters.map((monster) => (
+          <Grid item key={monster.id} xs={12} sm={6} md={4} lg={3}>
+            {" "}
+            {/* Set Grid item and spacing */}
+            <Card key={monster.id} sx={{ margin: 2, borderRadius: 2 }}>
+              <CardMedia
+                sx={{ height: 140, margin: 1, borderRadius: 2 }}
+                image={monster.imageUrl}
+                title={monster.name}
+              />
+              <Typography
+                gutterBottom
+                variant="h6"
+                sx={{
+                  display: "flex",
+                  flexDirection: "initial",
+                  paddingLeft: 1,
+                }}
+              >
+                {monster.name}
+              </Typography>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
       <div className="card">
         {selectedMonsterId ? (
-          <div>
-            <p>Card ID: {selectedMonsterId}</p>
-            <button onClick={() => dispatch(resetSelectedMonster())}>
-              Reset Card
-            </button>
-          </div>
+          <>
+            <Card sx={{ margin: 2, borderRadius: 2 }}>
+              <CardMedia
+                sx={{ height: 140, margin: 1, borderRadius: 2 }}
+                image="/img/ctchulu.jpg"
+                title="green iguana"
+              />
+              <Typography
+                gutterBottom
+                variant="h6"
+                sx={{
+                  display: "flex",
+                  flexDirection: "initial",
+                  paddingLeft: 1,
+                }}
+              >
+                {selectedMonsterId}
+              </Typography>
+            </Card>
+            <Button
+              variant="contained"
+              onClick={() => dispatch(resetSelectedMonster())}
+            >
+              Reset Monster
+            </Button>
+          </>
         ) : (
           <div>
-            <p>No card selected</p>
-            <button onClick={() => dispatch(selectMonster("monster-1"))}>
-              Select Card 1
-            </button>
-            <button onClick={() => dispatch(selectMonster("monster-2"))}>
-              Select Card 2
-            </button>
+            <p>No monster selected</p>
+            <Button
+              variant="contained"
+              onClick={() => dispatch(selectMonster("monster-1"))}
+            >
+              Select Monster 1
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => dispatch(selectMonster("monster-2"))}
+            >
+              Select Monster 2
+            </Button>
           </div>
         )}
-
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   );
 }
