@@ -1,10 +1,16 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import type { RootState } from "./app/store";
+import { useSelector, useDispatch } from "react-redux";
+import { selectMonster, resetSelectedMonster } from "./reducers/cardSlice";
+
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const dispatch = useDispatch();
+  const selectedMonsterId = useSelector(
+    (state: RootState) => state.monster.selectedMonsterId
+  );
 
   return (
     <>
@@ -18,9 +24,25 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+        {selectedMonsterId ? (
+          <div>
+            <p>Card ID: {selectedMonsterId}</p>
+            <button onClick={() => dispatch(resetSelectedMonster())}>
+              Reset Card
+            </button>
+          </div>
+        ) : (
+          <div>
+            <p>No card selected</p>
+            <button onClick={() => dispatch(selectMonster("monster-1"))}>
+              Select Card 1
+            </button>
+            <button onClick={() => dispatch(selectMonster("monster-2"))}>
+              Select Card 2
+            </button>
+          </div>
+        )}
+
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
@@ -29,7 +51,7 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
